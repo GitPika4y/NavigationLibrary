@@ -28,4 +28,11 @@
     <ItemGroup>
       <ProjectReference Include="..\NavigationLibrary\NavigationLibrary.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\Main\Options\OptionsView.axaml.cs">
+        <DependentUpon>OptionsView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
 </Project>

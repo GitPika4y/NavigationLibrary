@@ -2,13 +2,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModel="clr-namespace:Example.ViewModels.Main" x:DataType="viewModel:DashboardViewModel"
+             xmlns:viewModel="clr-namespace:Example.ViewModels.Main"
+             x:DataType="viewModel:DashboardViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Example.Views.Main.DashboardView">
 
 	<Grid ColumnDefinitions="450, *">
-		<TextBlock Grid.Column="0"
-		           Text="Top repositories"/>
+		<StackPanel Grid.Column="0"
+		            Background="DarkGray">
+			<TextBlock Text="Top repositories"/>
+		</StackPanel>
 
 		<StackPanel Grid.Column="1"
 		            HorizontalAlignment="Center">
@@ -19,6 +22,9 @@
 
 			<TextBlock Text="Feed"
 			           FontSize="16"/>
+
+			<Button Content="Issues"
+			        Command="{Binding NavigateToIssuesCommand}"/>
 		</StackPanel>
 	</Grid>
 </UserControl>

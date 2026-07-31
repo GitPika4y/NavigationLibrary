@@ -8,9 +8,9 @@
 
 	<Grid RowDefinitions="Auto, *, Auto">
 		<!-- ============================= HEADER ============================= -->
-		<Grid Grid.Row="0"
-		      ColumnDefinitions="*, *">
-
+		<Grid Grid.Row="0">
+			<TextBlock Text="Some Header"
+			           HorizontalAlignment="Center"/>
 		</Grid>
 
 		<Grid Grid.Row="1"
