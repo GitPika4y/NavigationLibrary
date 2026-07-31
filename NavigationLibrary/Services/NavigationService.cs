@@ -15,11 +15,11 @@ internal class NavigationService(NavigationState state) : INavigationService
     {
         destinationType.EnsureIsViewModelBase();
 
-        var layoutType = destinationType.GetLayoutType();
+        var destinationLayoutType = destinationType.GetLayoutType();
 
-        if (!state.IsRegistered(layoutType))
-            NavigateTo(layoutType);
+        if (!state.IsRegistered(destinationLayoutType))
+            NavigateTo(destinationLayoutType);
 
-        state.SynchronizeWith(layoutType, destinationType);
+        state.SynchronizeWith(destinationLayoutType, destinationType);
     }
 }
