@@ -1,6 +1,6 @@
-﻿using System.Reflection;
-using NavigationLibrary.Data;
-using NavigationLibrary.Factories;
+﻿using NavigationLibrary.Abstractions;
+using NavigationLibrary.Core;
+using NavigationLibrary.Extensions;
 
 namespace NavigationLibrary.Services;
 
@@ -10,27 +10,16 @@ internal class NavigationService(NavigationState state) : INavigationService
     {
         NavigateTo(typeof(TViewModel));
     }
-    private Type GetParentLayoutType(Type type)
+
+    public void NavigateTo(Type destinationType)
     {
-        var navigationParentAttribute = type
-            .GetCustomAttributes()
-            .FirstOrDefault(attr =>
-                attr.GetType().IsGenericType &&
-                attr.GetType().GetGenericTypeDefinition() == typeof(ParentLayoutAttribute<>));
+        destinationType.EnsureIsViewModelBase();
 
-        if (navigationParentAttribute is null)
-            throw new Exception($"'{type} has not NavigationParentAttribute to navigate");
-
-        return navigationParentAttribute.GetType().GetGenericArguments()[0];
-    }
-
-    private void NavigateTo(Type destinationType)
-    {
-        var layoutType = GetParentLayoutType(destinationType);
+        var layoutType = destinationType.GetLayoutType();
 
         if (!state.IsRegistered(layoutType))
             NavigateTo(layoutType);
 
-        state.UpdateWith(layoutType, destinationType);
+        state.SynchronizeWith(layoutType, destinationType);
     }
 }

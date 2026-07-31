@@ -1,8 +1,8 @@
-﻿using NavigationLibrary.Data;
+﻿using NavigationLibrary.Core;
 
-namespace NavigationLibrary.Factories;
+namespace NavigationLibrary.Abstractions;
 
-public interface IViewModelFactory
+internal interface IViewModelFactory
 {
     ViewModelBase CreateFrom<TViewModel>() where TViewModel : ViewModelBase;
     ViewModelBase CreateFrom(Type type);

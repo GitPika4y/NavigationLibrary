@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace NavigationLibrary.Data;
+namespace NavigationLibrary.Core;
 
 public class ViewModelBase: ObservableObject;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using NavigationLibrary.Data;
+using NavigationLibrary.Abstractions;
+using NavigationLibrary.Core;
 using NavigationLibrary.Factories;
 using NavigationLibrary.Services;
 
@@ -31,7 +32,8 @@ public static class ServiceCollectionExtensions
         where TRoot : ViewModelBase, ILayout
     {
         var navigationState = provider.GetRequiredService<NavigationState>();
-        var rootViewModel = navigationState.Register(typeof(TRoot));
+        var rootViewModel = navigationState.CreateAndRegister(typeof(TRoot));
+        navigationState.Synchronize(typeof(TRoot));
         return (TRoot)rootViewModel.Instance;
     }
 }

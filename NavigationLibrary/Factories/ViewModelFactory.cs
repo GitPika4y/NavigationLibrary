@@ -1,4 +1,6 @@
-﻿using NavigationLibrary.Data;
+﻿using NavigationLibrary.Abstractions;
+using NavigationLibrary.Core;
+using NavigationLibrary.Extensions;
 
 namespace NavigationLibrary.Factories;
 
@@ -6,12 +8,12 @@ internal class ViewModelFactory(Func<Type, ViewModelBase> factory) : IViewModelF
 {
     public ViewModelBase CreateFrom<TViewModel>() where TViewModel : ViewModelBase
     {
-        var type = typeof(TViewModel);
-        return factory.Invoke(type);
+        return CreateFrom(typeof(TViewModel));
     }
 
     public ViewModelBase CreateFrom(Type type)
     {
+        type.EnsureIsViewModelBase();
         return factory.Invoke(type);
     }
 }
