@@ -6,14 +6,14 @@ namespace NavigationLibrary.Services;
 
 internal class NavigationService(NavigationState state) : INavigationService
 {
-    public void NavigateTo<TViewModel>() where TViewModel : ViewModelBase
+    public void NavigateTo<TViewModel>() where TViewModel : INavigationTarget
     {
         NavigateTo(typeof(TViewModel));
     }
 
     public void NavigateTo(Type destinationType)
     {
-        destinationType.EnsureIsViewModelBase();
+        destinationType.EnsureIsNavigationViewModel();
 
         var destinationLayoutType = destinationType.GetLayoutType();
 

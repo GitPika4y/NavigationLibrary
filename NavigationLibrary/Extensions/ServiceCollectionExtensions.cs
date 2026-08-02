@@ -18,8 +18,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<NavigationState>();
         services.AddSingleton<INavigationService, NavigationService>();
 
-        services.AddSingleton<Func<Type, ViewModelBase>>(provider => type =>
-            (ViewModelBase)ActivatorUtilities.CreateInstance(provider, type));
+        services.AddSingleton<Func<Type, INavigationTarget>>(provider => type =>
+            (INavigationTarget)ActivatorUtilities.CreateInstance(provider, type));
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ public static class ServiceCollectionExtensions
     /// <typeparam name="TRoot"></typeparam>
     /// <returns>Instance of TRoot for DataContext</returns>
     public static TRoot RegisterNavigationRoot<TRoot>(this IServiceProvider provider)
-        where TRoot : ViewModelBase, ILayout
+        where TRoot : INavigationTarget, ILayout
     {
         var navigationState = provider.GetRequiredService<NavigationState>();
         var rootViewModel = navigationState.CreateAndRegister(typeof(TRoot));

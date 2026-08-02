@@ -6,24 +6,17 @@ namespace NavigationLibrary.Extensions;
 
 internal static class AttributeTypeExtensions
 {
-    private static ILayoutAttribute GetLayoutAttribute(Type inheritorType, Type attributeType)
+    public static Type GetLayoutType(this Type inheritorType)
     {
         var attribute = inheritorType
             .GetCustomAttributes()
             .FirstOrDefault(attr =>
                 attr.GetType().IsGenericType &&
-                attr.GetType().GetGenericTypeDefinition() == attributeType);
+                attr.GetType().GetGenericTypeDefinition() == typeof(ParentLayout<>));
 
         if (attribute is null)
-            throw new Exception($"'{inheritorType} has not {attributeType} to navigate");
+            throw new Exception($"'{inheritorType} has not {typeof(ParentLayout<>)} to navigate");
 
-        return (ILayoutAttribute)attribute;
+        return attribute.GetType().GetGenericArguments()[0];
     }
-
-    public static Type GetLayoutType(this Type inheritorType)
-    {
-        var attribute = GetLayoutAttribute(inheritorType, typeof(LayoutAttribute<>));
-        return attribute.LayoutType;
-    }
-
 }

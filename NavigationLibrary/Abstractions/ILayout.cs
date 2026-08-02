@@ -4,11 +4,8 @@ namespace NavigationLibrary.Abstractions;
 
 public interface ILayout
 {
-    ViewModelBase Content { get; set; }
+    INavigationTarget Content { get; set; }
 }
 
 public interface ILayout<TDefaultContent>: ILayout
-    where TDefaultContent : ViewModelBase
-{
-    static Type DefaultContentType { get; } = typeof(TDefaultContent);
-}
+    where TDefaultContent : INavigationTarget;

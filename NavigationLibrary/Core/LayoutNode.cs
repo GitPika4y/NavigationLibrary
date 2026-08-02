@@ -2,19 +2,17 @@
 
 namespace NavigationLibrary.Core;
 
-internal class LayoutNode(
-    Type type,
-    ILayout instance)
+internal class LayoutNode(Type type, ILayout instance)
 {
-    public Type Type { get; } = type;
+    private readonly Type _type = type;
+    private LayoutNode? _next;
     public ILayout Instance { get; } = instance;
-    public LayoutNode? Next { get; private set; }
 
     public LayoutNode? Find(Type type)
     {
-        for (var node = this; node is not null; node = node.Next)
+        for (var node = this; node is not null; node = node._next)
         {
-            if (node.Type == type) return node;
+            if (node._type == type) return node;
         }
 
         return null;
@@ -23,10 +21,10 @@ internal class LayoutNode(
     public void Add(LayoutNode node)
     {
         var last = this;
-        while (last.Next is not null) last = last.Next;
+        while (last._next is not null) last = last._next;
 
-        last.Next = node;
+        last._next = node;
     }
-    public void TrimAfter() => Next = null;
+    public void TrimAfter() => _next = null;
     public bool Any(Type type) => Find(type) is not null;
 }

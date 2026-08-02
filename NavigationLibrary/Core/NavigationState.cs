@@ -30,22 +30,20 @@ internal class NavigationState(IViewModelFactory factory)
     /// <param name="contentType"></param>
     public void SynchronizeWith(Type layoutType, Type contentType) => SynchronizeWith(layoutType, contentType, []);
 
-
     private void SynchronizeWith(Type layoutType, Type contentType, HashSet<Type> visited)
     {
         var layoutNode = GetOrCreate(layoutType);
         layoutNode.TrimAfter();
         var content = CreateAndSetContent(layoutNode.Instance, contentType);
 
-        if (content.IsILayout(out var contentLayout))
-        {
-            var contentLayoutType = contentLayout.GetType();
-            RegisterLayout(contentLayout, contentLayoutType);
-            Synchronize(contentLayoutType, visited);
-        }
+        if (!content.IsILayout(out var contentLayout)) return;
+
+        var contentLayoutType = contentLayout.GetType();
+        RegisterLayout(contentLayout, contentLayoutType);
+        Synchronize(contentLayoutType, visited);
     }
 
-    private ViewModelBase CreateAndSetContent(ILayout layoutInstance, Type contentType)
+    private INavigationTarget CreateAndSetContent(ILayout layoutInstance, Type contentType)
     {
         var content = factory.CreateFrom(contentType);
         layoutInstance.Content = content;

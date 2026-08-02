@@ -4,16 +4,16 @@ using NavigationLibrary.Extensions;
 
 namespace NavigationLibrary.Factories;
 
-internal class ViewModelFactory(Func<Type, ViewModelBase> factory) : IViewModelFactory
+internal class ViewModelFactory(Func<Type, INavigationTarget> factory) : IViewModelFactory
 {
-    public ViewModelBase CreateFrom<TViewModel>() where TViewModel : ViewModelBase
+    public INavigationTarget CreateFrom<TViewModel>() where TViewModel : INavigationTarget
     {
         return CreateFrom(typeof(TViewModel));
     }
 
-    public ViewModelBase CreateFrom(Type type)
+    public INavigationTarget CreateFrom(Type type)
     {
-        type.EnsureIsViewModelBase();
+        type.EnsureIsNavigationViewModel();
         return factory.Invoke(type);
     }
 }

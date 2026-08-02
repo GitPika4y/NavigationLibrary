@@ -5,15 +5,15 @@ namespace NavigationLibrary.Extensions;
 
 internal static class TypeExtensions
 {
-    public static void EnsureIsViewModelBase(this Type type)
+    public static void EnsureIsNavigationViewModel(this Type type)
     {
-        if (!typeof(ViewModelBase).IsAssignableFrom(type))
-            throw new Exception($"'{type}' is not inherit from ViewModelBase class");
+        if (!typeof(INavigationTarget).IsAssignableFrom(type))
+            throw new Exception($"'{type}' is not inherit from INavigationViewModel interface");
     }
 
-    public static bool IsILayout(this ViewModelBase viewModel, out ILayout layout)
+    public static bool IsILayout(this INavigationTarget navigationViewModel, out ILayout layout)
     {
-        if (viewModel is not ILayout layoutInstance)
+        if (navigationViewModel is not ILayout layoutInstance)
         {
             layout = null!;
             return false;
