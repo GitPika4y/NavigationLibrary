@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using NavigationLibrary.Abstractions;
 using NavigationLibrary.Attributes;
 
 namespace NavigationLibrary.Extensions;
@@ -12,10 +11,10 @@ internal static class AttributeTypeExtensions
             .GetCustomAttributes()
             .FirstOrDefault(attr =>
                 attr.GetType().IsGenericType &&
-                attr.GetType().GetGenericTypeDefinition() == typeof(ParentLayout<>));
+                attr.GetType().GetGenericTypeDefinition() == typeof(ParentLayoutAttribute<>));
 
         if (attribute is null)
-            throw new Exception($"'{inheritorType} has not {typeof(ParentLayout<>)} to navigate");
+            throw new Exception($"'{inheritorType}' has not {typeof(ParentLayoutAttribute<>)} to navigate");
 
         return attribute.GetType().GetGenericArguments()[0];
     }

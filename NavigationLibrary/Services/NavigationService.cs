@@ -13,13 +13,23 @@ internal class NavigationService(NavigationState state) : INavigationService
 
     public void NavigateTo(Type destinationType)
     {
-        destinationType.EnsureIsNavigationViewModel();
+        NavigateTo(destinationType, null);
+    }
+
+    public void NavigateTo<TDestination, TParameter>(TParameter parameter) where TDestination : INavigationTarget<TParameter>
+    {
+        NavigateTo(typeof(TDestination), parameter);
+    }
+
+    public void NavigateTo(Type destinationType, object? parameter)
+    {
+        destinationType.EnsureIsNavigationTarget();
 
         var destinationLayoutType = destinationType.GetLayoutType();
 
         if (!state.IsRegistered(destinationLayoutType))
             NavigateTo(destinationLayoutType);
 
-        state.SynchronizeWith(destinationLayoutType, destinationType);
+        state.SynchronizeWith(destinationLayoutType, destinationType, parameter);
     }
 }

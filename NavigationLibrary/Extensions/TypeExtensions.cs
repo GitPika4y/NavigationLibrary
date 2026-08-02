@@ -1,26 +1,13 @@
 ﻿using NavigationLibrary.Abstractions;
-using NavigationLibrary.Core;
 
 namespace NavigationLibrary.Extensions;
 
 internal static class TypeExtensions
 {
-    public static void EnsureIsNavigationViewModel(this Type type)
+    public static void EnsureIsNavigationTarget(this Type type)
     {
         if (!typeof(INavigationTarget).IsAssignableFrom(type))
-            throw new Exception($"'{type}' is not inherit from INavigationViewModel interface");
-    }
-
-    public static bool IsILayout(this INavigationTarget navigationViewModel, out ILayout layout)
-    {
-        if (navigationViewModel is not ILayout layoutInstance)
-        {
-            layout = null!;
-            return false;
-        }
-
-        layout = layoutInstance;
-        return true;
+            throw new Exception($"'{type}' is not inherit from INavigationTarget interface");
     }
 
     public static Type GetDefaultContentType(this Type layoutType)

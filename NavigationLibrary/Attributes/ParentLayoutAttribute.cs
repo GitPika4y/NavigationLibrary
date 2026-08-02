@@ -3,5 +3,5 @@
 namespace NavigationLibrary.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class ParentLayout<TLayoutType> : Attribute
+public class ParentLayoutAttribute<TLayoutType> : Attribute
     where TLayoutType : INavigationTarget, ILayout;

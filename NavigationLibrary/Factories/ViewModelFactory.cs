@@ -13,7 +13,7 @@ internal class ViewModelFactory(Func<Type, INavigationTarget> factory) : IViewMo
 
     public INavigationTarget CreateFrom(Type type)
     {
-        type.EnsureIsNavigationViewModel();
+        type.EnsureIsNavigationTarget();
         return factory.Invoke(type);
     }
 }

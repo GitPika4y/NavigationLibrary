@@ -1,6 +1,4 @@
-﻿using NavigationLibrary.Core;
-
-namespace NavigationLibrary.Abstractions;
+﻿namespace NavigationLibrary.Abstractions;
 
 public interface ILayout
 {

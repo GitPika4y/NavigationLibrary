@@ -11,16 +11,17 @@ internal class NavigationState(IViewModelFactory factory)
     /// Sets the layout to its standard content
     /// </summary>
     /// <param name="layoutType"></param>
-    public void Synchronize(Type layoutType) => Synchronize(layoutType, []);
+    /// <param name="parameter"></param>
+    public void Synchronize(Type layoutType, object? parameter = null) => Synchronize(layoutType, parameter, []);
 
-    private void Synchronize(Type layoutType, HashSet<Type> visited)
+    private void Synchronize(Type layoutType, object? parameter, HashSet<Type> visited)
     {
         if (!visited.Add(layoutType))
             throw new InvalidOperationException(
                 $"Cyclic default content detected involving '{layoutType}'");
 
         var defaultContentType = layoutType.GetDefaultContentType();
-        SynchronizeWith(layoutType, defaultContentType, visited);
+        SynchronizeWith(layoutType, defaultContentType, parameter, visited);
     }
 
     /// <summary>
@@ -28,24 +29,26 @@ internal class NavigationState(IViewModelFactory factory)
     /// </summary>
     /// <param name="layoutType"></param>
     /// <param name="contentType"></param>
-    public void SynchronizeWith(Type layoutType, Type contentType) => SynchronizeWith(layoutType, contentType, []);
+    /// <param name="parameter"></param>
+    public void SynchronizeWith(Type layoutType, Type contentType, object? parameter = null) => SynchronizeWith(layoutType, contentType, parameter, []);
 
-    private void SynchronizeWith(Type layoutType, Type contentType, HashSet<Type> visited)
+    private void SynchronizeWith(Type layoutType, Type contentType, object? parameter, HashSet<Type> visited)
     {
         var layoutNode = GetOrCreate(layoutType);
         layoutNode.TrimAfter();
-        var content = CreateAndSetContent(layoutNode.Instance, contentType);
+        var content = CreateAndSetContent(layoutNode.Instance, contentType, parameter);
 
-        if (!content.IsILayout(out var contentLayout)) return;
+        if (!content.IsLayout(out var contentLayout)) return;
 
         var contentLayoutType = contentLayout.GetType();
         RegisterLayout(contentLayout, contentLayoutType);
-        Synchronize(contentLayoutType, visited);
+        Synchronize(contentLayoutType, parameter, visited);
     }
 
-    private INavigationTarget CreateAndSetContent(ILayout layoutInstance, Type contentType)
+    private INavigationTarget CreateAndSetContent(ILayout layoutInstance, Type contentType, object? parameter)
     {
         var content = factory.CreateFrom(contentType);
+        content.ApplyParameter(parameter);
         layoutInstance.Content = content;
 
         return content;
