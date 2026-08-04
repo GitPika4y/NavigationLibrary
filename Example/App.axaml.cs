@@ -33,7 +33,7 @@ public partial class App : Application
             DisableAvaloniaDataAnnotationValidation();
             desktop.MainWindow = new MainWindow
             {
-                DataContext = provider.RegisterNavigationRoot<MainWindowViewModel>()
+                DataContext = provider.InitializeNavigationRoot<MainWindowViewModel>()
             };
         }
 

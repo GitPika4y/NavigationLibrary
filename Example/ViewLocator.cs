@@ -2,7 +2,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Example.ViewModels;
+using NavigationLibrary.Abstractions;
 using NavigationLibrary.Core;
 
 namespace Example;
@@ -33,6 +35,6 @@ public class ViewLocator : IDataTemplate
 
     public bool Match(object? data)
     {
-        return data is ViewModelBase;
+        return data is ObservableObject;
     }
 }

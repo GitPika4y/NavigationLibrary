@@ -1,17 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using Example.Views.Main;
+using Example.ViewModels.Main.Options;
 using NavigationLibrary.Abstractions;
 using NavigationLibrary.Attributes;
-using NavigationLibrary.Core;
 
 namespace Example.ViewModels.Main;
 
-[Layout<MainViewModel>]
-public partial class DashboardViewModel(INavigationService navigationService): ViewModelBase
+[ParentLayout<MainViewModel>]
+public partial class DashboardViewModel(INavigationService navigationService): NavigationTargetViewModel
 {
     [RelayCommand]
     private void NavigateToIssues()
     {
-        navigationService.NavigateTo<Options.OptionsViewModel>();
+        navigationService.NavigateTo<OptionsViewModel>();
     }
 }

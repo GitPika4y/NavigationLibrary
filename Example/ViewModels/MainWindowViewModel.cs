@@ -1,12 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using Example.ViewModels.Main;
-using NavigationLibrary.Abstractions;
-using NavigationLibrary.Attributes;
-using NavigationLibrary.Core;
+﻿using Example.ViewModels.Main;
 
 namespace Example.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase, ILayout<MainViewModel>
-{
-    [ObservableProperty] private ViewModelBase _content;
-}
+public partial class MainWindowViewModel : NavigationLayoutViewModel<MainViewModel>;
