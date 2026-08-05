@@ -12,7 +12,7 @@ internal class NavigationState(IViewModelFactory factory)
     /// </summary>
     /// <param name="layoutType"></param>
     /// <param name="parameter"></param>
-    public void Synchronize(Type layoutType, object? parameter = null) => Synchronize(layoutType, parameter, []);
+    internal void Synchronize(Type layoutType, object? parameter = null) => Synchronize(layoutType, parameter, []);
 
     private void Synchronize(Type layoutType, object? parameter, HashSet<Type> visited)
     {
@@ -30,7 +30,7 @@ internal class NavigationState(IViewModelFactory factory)
     /// <param name="layoutType"></param>
     /// <param name="contentType"></param>
     /// <param name="parameter"></param>
-    public void SynchronizeWith(Type layoutType, Type contentType, object? parameter = null) => SynchronizeWith(layoutType, contentType, parameter, []);
+    internal void SynchronizeWith(Type layoutType, Type contentType, object? parameter = null) => SynchronizeWith(layoutType, contentType, parameter, []);
 
     private void SynchronizeWith(Type layoutType, Type contentType, object? parameter, HashSet<Type> visited)
     {
@@ -60,9 +60,9 @@ internal class NavigationState(IViewModelFactory factory)
                ?? CreateAndRegister(layoutType);
     }
 
-    public bool IsRegistered(Type layoutType) => _layoutsChain?.Any(layoutType) ?? false;
+    internal bool IsRegistered(Type layoutType) => _layoutsChain?.Any(layoutType) ?? false;
 
-    public LayoutNode CreateAndRegister(Type layoutType)
+    internal LayoutNode CreateAndRegister(Type layoutType)
     {
         var layout = (ILayout)factory.CreateFrom(layoutType);
         return RegisterLayout(layout, layoutType);

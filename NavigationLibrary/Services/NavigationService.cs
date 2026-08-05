@@ -25,7 +25,7 @@ internal class NavigationService(NavigationState state) : INavigationService
     {
         destinationType.EnsureIsNavigationTarget();
 
-        var destinationLayoutType = destinationType.GetLayoutType();
+        var destinationLayoutType = destinationType.GetParentLayoutType();
 
         if (!state.IsRegistered(destinationLayoutType))
             NavigateTo(destinationLayoutType);
