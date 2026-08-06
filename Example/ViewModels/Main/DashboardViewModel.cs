@@ -11,6 +11,6 @@ public partial class DashboardViewModel(INavigationService navigationService): N
     [RelayCommand]
     private void NavigateToIssues()
     {
-        navigationService.NavigateTo<OptionsViewModel>();
+        navigationService.NavigateTo<AnotherOptionsViewModel>();
     }
 }

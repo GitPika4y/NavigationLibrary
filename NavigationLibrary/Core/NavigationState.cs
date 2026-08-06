@@ -8,50 +8,64 @@ internal class NavigationState(IViewModelFactory factory)
     private LayoutNode? _layoutsChain;
 
     /// <summary>
-    /// Sets the layout to its standard content
+    /// Ensures that every layout from the registered root down to <paramref name="layoutType"/>
+    /// exists and is wired as its parent's content. Unlike <see cref="Synchronize"/>, this never
+    /// touches default content — it only guarantees the structural chain is in place so that a
+    /// caller can immediately place its own explicit content into <paramref name="layoutType"/>.
     /// </summary>
-    /// <param name="layoutType"></param>
-    /// <param name="parameter"></param>
-    internal void Synchronize(Type layoutType, object? parameter = null) => Synchronize(layoutType, parameter, []);
-
-    private void Synchronize(Type layoutType, object? parameter, HashSet<Type> visited)
+    internal LayoutNode EnsureLayoutRegistered(Type layoutType)
     {
+        var existing = _layoutsChain?.Find(layoutType);
+        if (existing is not null) return existing;
+
+        var parentLayoutType = layoutType.GetParentLayoutType();
+
+        var parentNode = EnsureLayoutRegistered(parentLayoutType);
+        parentNode.TrimAfter();
+
+        var layout = (ILayout)factory.CreateFrom(layoutType);
+        parentNode.Instance.Content = (INavigationTarget)layout;
+
+        return RegisterLayout(layout, layoutType);
+    }
+
+    /// <summary>
+    /// Places <paramref name="contentType"/> as the content of <paramref name="layoutType"/>, applying
+    /// <paramref name="parameter"/> to it. Does NOT resolve default content, even if the created
+    /// instance turns out to be a layout — that decision belongs to the caller (see <see cref="SetDefaultContent"/>).
+    /// </summary>
+    internal INavigationTarget SetContent(Type layoutType, Type contentType, object? parameter)
+    {
+        var layoutNode = GetOrCreate(layoutType);
+        layoutNode.TrimAfter();
+
+        var content = factory.CreateFrom(contentType);
+        content.ApplyParameter(parameter);
+        layoutNode.Instance.Content = content;
+
+        if (content.IsLayout(out var contentLayout))
+            RegisterLayout(contentLayout, contentLayout.GetType());
+
+        return content;
+    }
+
+    /// <summary>
+    /// Resolves <paramref name="layoutType"/>'s own <c>ILayout&lt;TDefaultContent&gt;</c> content, and
+    /// cascades further if that default content is itself a layout. Always uses a null parameter —
+    /// default content was not explicitly requested, so it cannot carry a caller-supplied parameter.
+    /// </summary>
+    internal void SetDefaultContent(Type layoutType, HashSet<Type>? visited = null)
+    {
+        visited ??= [];
         if (!visited.Add(layoutType))
             throw new InvalidOperationException(
                 $"Cyclic default content detected involving '{layoutType}'");
 
         var defaultContentType = layoutType.GetDefaultContentType();
-        SynchronizeWith(layoutType, defaultContentType, parameter, visited);
-    }
+        var content = SetContent(layoutType, defaultContentType, null);
 
-    /// <summary>
-    /// Sets the layout to the passed content
-    /// </summary>
-    /// <param name="layoutType"></param>
-    /// <param name="contentType"></param>
-    /// <param name="parameter"></param>
-    internal void SynchronizeWith(Type layoutType, Type contentType, object? parameter = null) => SynchronizeWith(layoutType, contentType, parameter, []);
-
-    private void SynchronizeWith(Type layoutType, Type contentType, object? parameter, HashSet<Type> visited)
-    {
-        var layoutNode = GetOrCreate(layoutType);
-        layoutNode.TrimAfter();
-        var content = CreateAndSetContent(layoutNode.Instance, contentType, parameter);
-
-        if (!content.IsLayout(out var contentLayout)) return;
-
-        var contentLayoutType = contentLayout.GetType();
-        RegisterLayout(contentLayout, contentLayoutType);
-        Synchronize(contentLayoutType, parameter, visited);
-    }
-
-    private INavigationTarget CreateAndSetContent(ILayout layoutInstance, Type contentType, object? parameter)
-    {
-        var content = factory.CreateFrom(contentType);
-        content.ApplyParameter(parameter);
-        layoutInstance.Content = content;
-
-        return content;
+        if (content.IsLayout(out var contentLayout))
+            SetDefaultContent(contentLayout.GetType(), visited);
     }
 
     private LayoutNode GetOrCreate(Type layoutType)
@@ -59,8 +73,6 @@ internal class NavigationState(IViewModelFactory factory)
         return _layoutsChain?.Find(layoutType)
                ?? CreateAndRegister(layoutType);
     }
-
-    internal bool IsRegistered(Type layoutType) => _layoutsChain?.Any(layoutType) ?? false;
 
     internal LayoutNode CreateAndRegister(Type layoutType)
     {

@@ -11,6 +11,11 @@ internal static class TypeExtensions
             throw new Exception($"'{type}' is not inherit from INavigationTarget interface");
     }
 
+    internal static bool IsLayout(this Type type)
+    {
+        return typeof(ILayout).IsAssignableFrom(type);
+    }
+
     internal static Type GetDefaultContentType(this Type layoutType) =>
         NavigationCache.GetDefaultContentType(layoutType);
 }

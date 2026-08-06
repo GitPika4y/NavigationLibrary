@@ -33,7 +33,7 @@ public static class ServiceCollectionExtensions
     {
         var navigationState = provider.GetRequiredService<NavigationState>();
         var rootViewModel = navigationState.CreateAndRegister(typeof(TRoot));
-        navigationState.Synchronize(typeof(TRoot));
+        navigationState.SetDefaultContent(typeof(TRoot));
         return (TRoot)rootViewModel.Instance;
     }
 }

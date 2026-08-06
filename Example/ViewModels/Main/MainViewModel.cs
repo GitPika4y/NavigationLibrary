@@ -6,4 +6,4 @@ using NavigationLibrary.Attributes;
 namespace Example.ViewModels.Main;
 
 [ParentLayout<MainWindowViewModel>]
-public partial class MainViewModel: NavigationLayoutViewModel<OptionsViewModel>;
+public partial class MainViewModel: NavigationLayoutViewModel<DashboardViewModel>;

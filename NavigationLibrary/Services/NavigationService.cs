@@ -24,12 +24,11 @@ internal class NavigationService(NavigationState state) : INavigationService
     public void NavigateTo(Type destinationType, object? parameter)
     {
         destinationType.EnsureIsNavigationTarget();
+        var layoutType = destinationType.GetParentLayoutType();
+        state.EnsureLayoutRegistered(layoutType);
+        var content = state.SetContent(layoutType, destinationType, parameter);
 
-        var destinationLayoutType = destinationType.GetParentLayoutType();
-
-        if (!state.IsRegistered(destinationLayoutType))
-            NavigateTo(destinationLayoutType);
-
-        state.SynchronizeWith(destinationLayoutType, destinationType, parameter);
+        if (content.IsLayout(out _))
+            state.SetDefaultContent(destinationType);
     }
 }
