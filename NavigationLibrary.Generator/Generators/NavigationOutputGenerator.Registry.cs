@@ -54,7 +54,7 @@ public partial class NavigationOutputGenerator
                          return layoutType;
                      }
 
-                     public void ApplyParameter(INavigationTarget target, object? parameter)
+                     public void ApplyParameter(INavigationTarget target, object parameter)
                      {
                          if (!{{parameterizedDictionaryName}}.TryGetValue(target.GetType(), out var entry))
                              return;
@@ -119,7 +119,7 @@ public partial class NavigationOutputGenerator
 
         return
             $$"""
-                private readonly Dictionary<Type, (Type ParameterType, Action<INavigationTarget, object?> Apply)> {{dictionaryName}} = new()
+                private readonly Dictionary<Type, (Type ParameterType, Action<INavigationTarget, object> Apply)> {{dictionaryName}} = new()
                 {
                     {{string.Join(",\n", pairs)}}
                 };

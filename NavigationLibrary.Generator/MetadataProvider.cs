@@ -55,11 +55,8 @@ public static class MetadataProvider
         var navigationTargetInterface =
             symbol.FindImplementedInterface(compilation, NavigationTargetInterfaceMetadataName);
 
-        if (viewAttribute is null ||
-            navigationTargetInterface is null)
-        {
+        if (navigationTargetInterface is null)
             return null;
-        }
 
         var parentLayoutAttribute = symbol.FindAttribute(compilation, ParentLayoutAttributeMetadataName);
         var layoutInterface = symbol.FindImplementedInterface(compilation, LayoutInterfaceMetadataName);
@@ -67,7 +64,7 @@ public static class MetadataProvider
             symbol.FindImplementedInterface(compilation, NavigationTargetInterfaceMarkedMetadataName);
 
         var className = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        var viewType = viewAttribute!.AttributeClass!.GetGenericArgumentType();
+        var viewType = viewAttribute?.AttributeClass?.GetGenericArgumentType();
         var parentLayoutType = parentLayoutAttribute?.AttributeClass?.GetGenericArgumentType();
         var defaultContentType = layoutInterface?.GetGenericArgumentType();
         var navigationParameterType = navigationTargetParameterizedInterface?.GetGenericArgumentType();
@@ -76,6 +73,7 @@ public static class MetadataProvider
             .FirstOrDefault()
             ?.Name;
 
+        var location = symbol.Locations.FirstOrDefault();
 
         return new ViewModelMetadata(
             className,
@@ -83,6 +81,7 @@ public static class MetadataProvider
             parentLayoutType,
             defaultContentType,
             navigationParameterType,
-            onNavigatedToMethodName);
+            onNavigatedToMethodName,
+            location);
     }
 }
