@@ -1,5 +1,4 @@
 ﻿using NavigationLibrary.Abstractions;
-using NavigationLibrary.Cache;
 
 namespace NavigationLibrary.Extensions;
 
@@ -15,7 +14,4 @@ internal static class TypeExtensions
     {
         return typeof(ILayout).IsAssignableFrom(type);
     }
-
-    internal static Type GetDefaultContentType(this Type layoutType) =>
-        NavigationCache.GetDefaultContentType(layoutType);
 }

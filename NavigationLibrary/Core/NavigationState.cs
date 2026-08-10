@@ -3,7 +3,9 @@ using NavigationLibrary.Extensions;
 
 namespace NavigationLibrary.Core;
 
-internal class NavigationState(IViewModelFactory factory)
+internal class NavigationState(
+    IViewModelFactory factory,
+    INavigationRegistry registry)
 {
     private LayoutNode? _layoutsChain;
 
@@ -18,7 +20,7 @@ internal class NavigationState(IViewModelFactory factory)
         var existing = _layoutsChain?.Find(layoutType);
         if (existing is not null) return existing;
 
-        var parentLayoutType = layoutType.GetParentLayoutType();
+        var parentLayoutType = registry.GetParentLayoutType(layoutType);
 
         var parentNode = EnsureLayoutRegistered(parentLayoutType);
         parentNode.TrimAfter();
@@ -40,7 +42,7 @@ internal class NavigationState(IViewModelFactory factory)
         layoutNode.TrimAfter();
 
         var content = factory.CreateFrom(contentType);
-        content.ApplyParameter(parameter);
+        registry.ApplyParameter(content, parameter);
         layoutNode.Instance.Content = content;
 
         if (content.IsLayout(out var contentLayout))
@@ -61,7 +63,7 @@ internal class NavigationState(IViewModelFactory factory)
             throw new InvalidOperationException(
                 $"Cyclic default content detected involving '{layoutType}'");
 
-        var defaultContentType = layoutType.GetDefaultContentType();
+        var defaultContentType = registry.GetDefaultContentType(layoutType);
         var content = SetContent(layoutType, defaultContentType, null);
 
         if (content.IsLayout(out var contentLayout))

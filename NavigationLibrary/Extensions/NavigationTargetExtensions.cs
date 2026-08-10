@@ -1,5 +1,4 @@
 ﻿using NavigationLibrary.Abstractions;
-using NavigationLibrary.Cache;
 
 namespace NavigationLibrary.Extensions;
 
@@ -15,10 +14,5 @@ public static class NavigationTargetExtensions
 
         layout = layoutInstance;
         return true;
-    }
-
-    public static void ApplyParameter(this INavigationTarget target, object? parameter)
-    {
-        NavigationCache.ApplyParameter(target, parameter);
     }
 }

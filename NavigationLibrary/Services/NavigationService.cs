@@ -4,7 +4,9 @@ using NavigationLibrary.Extensions;
 
 namespace NavigationLibrary.Services;
 
-internal class NavigationService(NavigationState state) : INavigationService
+internal class NavigationService(
+    NavigationState state,
+    INavigationRegistry registry) : INavigationService
 {
     public void NavigateTo<TViewModel>() where TViewModel : INavigationTarget
     {
@@ -24,7 +26,7 @@ internal class NavigationService(NavigationState state) : INavigationService
     public void NavigateTo(Type destinationType, object? parameter)
     {
         destinationType.EnsureIsNavigationTarget();
-        var layoutType = destinationType.GetParentLayoutType();
+        var layoutType = registry.GetParentLayoutType(destinationType);
         state.EnsureLayoutRegistered(layoutType);
         var content = state.SetContent(layoutType, destinationType, parameter);
 

@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
     /// Inject dependencies for navigation
     /// </summary>
     /// <param name="services"></param>
-    public static void AddNavigation(this IServiceCollection services)
+    public static void AddNavigationCore(this IServiceCollection services)
     {
         services.AddSingleton<IViewModelFactory, ViewModelFactory>();
         services.AddSingleton<NavigationState>();
