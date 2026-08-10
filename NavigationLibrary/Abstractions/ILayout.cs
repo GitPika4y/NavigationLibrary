@@ -1,6 +1,6 @@
 ﻿namespace NavigationLibrary.Abstractions;
 
-public interface ILayout
+public interface ILayout: INavigationTarget
 {
     INavigationTarget Content { get; set; }
 }
