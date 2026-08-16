@@ -12,16 +12,19 @@ public static class MetadataProvider
 {
     private const string ParentLayoutAttributeMetadataName = "NavigationLibrary.Attributes.ParentLayoutAttribute`1";
     private const string ViewAttributeMetadataName = "NavigationLibrary.Attributes.ViewAttribute`1";
+    private const string RootAttributeMetadataName = "NavigationLibrary.Attributes.RootAttribute";
     private const string LayoutInterfaceMetadataName = "NavigationLibrary.Abstractions.ILayout`1";
     private const string NavigationTargetInterfaceMetadataName = "NavigationLibrary.Abstractions.INavigationTarget";
-    private const string NavigationTargetInterfaceMarkedMetadataName = "NavigationLibrary.Abstractions.INavigationTarget`1";
+
+    private const string NavigationTargetInterfaceMarkedMetadataName =
+        "NavigationLibrary.Abstractions.INavigationTarget`1";
 
     public static IncrementalValueProvider<ImmutableArray<ViewModelMetadata>> Create(SyntaxValueProvider syntaxProvider)
     {
         return syntaxProvider.CreateSyntaxProvider(Filter, Map)
-            .Where(static s => s is not null)
-            .Select(static (m, _) => m!)
-            .Collect();
+                             .Where(static s => s is not null)
+                             .Select(static (m, _) => m!)
+                             .Collect();
     }
 
     /// <summary>
@@ -59,24 +62,26 @@ public static class MetadataProvider
             return null;
 
         var parentLayoutAttribute = symbol.FindAttribute(compilation, ParentLayoutAttributeMetadataName);
-        var layoutInterface = symbol.FindImplementedInterface(compilation, LayoutInterfaceMetadataName);
+        var layoutInterface       = symbol.FindImplementedInterface(compilation, LayoutInterfaceMetadataName);
         var navigationTargetParameterizedInterface =
             symbol.FindImplementedInterface(compilation, NavigationTargetInterfaceMarkedMetadataName);
 
-        var className = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-        var viewType = viewAttribute?.AttributeClass?.GetGenericArgumentType();
-        var parentLayoutType = parentLayoutAttribute?.AttributeClass?.GetGenericArgumentType();
-        var defaultContentType = layoutInterface?.GetGenericArgumentType();
+        var className               = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var viewType                = viewAttribute?.AttributeClass?.GetGenericArgumentType();
+        var isRoot                  = symbol.FindAttribute(compilation, RootAttributeMetadataName) is not null;
+        var parentLayoutType        = parentLayoutAttribute?.AttributeClass?.GetGenericArgumentType();
+        var defaultContentType      = layoutInterface?.GetGenericArgumentType();
         var navigationParameterType = navigationTargetParameterizedInterface?.GetGenericArgumentType();
         var onNavigatedToMethodName = navigationTargetParameterizedInterface?.GetMembers()
-            .OfType<IMethodSymbol>()
-            .FirstOrDefault()
-            ?.Name;
+                                                                             .OfType<IMethodSymbol>()
+                                                                             .FirstOrDefault()
+                                                                            ?.Name;
 
         var location = symbol.Locations.FirstOrDefault();
 
         return new ViewModelMetadata(
             className,
+            isRoot,
             viewType,
             parentLayoutType,
             defaultContentType,

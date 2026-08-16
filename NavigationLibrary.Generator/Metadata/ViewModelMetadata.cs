@@ -4,6 +4,7 @@ namespace NavigationLibrary.Generator.Metadata;
 
 public class ViewModelMetadata(
     string classType,
+    bool isRoot,
     string? viewType,
     string? parentLayoutType,
     string? defaultContentType,
@@ -12,6 +13,7 @@ public class ViewModelMetadata(
     Location? location)
 {
     public string ClassType { get; } = classType;
+    public bool IsRoot { get; } = isRoot;
     public string? ViewType { get; } = viewType;
     public string? ParentLayoutType { get; } = parentLayoutType;
     public string? DefaultContentType { get; } = defaultContentType;
