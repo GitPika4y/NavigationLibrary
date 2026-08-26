@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
     /// <param name="provider"></param>
     /// <typeparam name="TRoot"></typeparam>
     /// <returns>Instance of TRoot for DataContext</returns>
-    public static TRoot InitializeNavigationRoot<TRoot>(this IServiceProvider provider)
+    public static TRoot InitializeNavigationRootCore<TRoot>(this IServiceProvider provider)
         where TRoot : ILayout
     {
         var navigationState = provider.GetRequiredService<NavigationState>();

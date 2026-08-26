@@ -17,27 +17,32 @@ Compile-time навигация для WPF и Avalonia. Никакой рефл�
   - [Пример использования](#пример-использования-с-communitytoolkitmvvm)
 - [Зачем `ILayout` и его `Content`](#зачем-нужен-ilayout-и-что-делать-с-его-content-в-xaml)
 - [Диагностика на этапе компиляции](#диагностика-на-этапе-компиляции)
+- [Troubleshooting](#troubleshooting)
 
 
 ## Требования
 
 - .NET 8
 - WPF (`net8.0-windows`) или Avalonia (`net8.0`, пакет `Avalonia` подключается вашим проектом самостоятельно)
+- `Microsoft.Extensions.DependencyInjection` версии `8.0.1` или новее — библиотека сама тянет `Microsoft.Extensions.DependencyInjection.Abstractions 8.0.2`, а `IServiceCollection`/`ServiceProvider` (см. [Инициализацию](#инициализация)) нужно подключать в приложении отдельно
 
 ## Как это устроено
 
 Библиотека описывает связи между экранами тремя способами прямо на ViewModel:
 
 - `[View<TView>]` — какой View отображает эту ViewModel. **Обязателен** для любого не абстрактного класса, реализующего `INavigationTarget` — если забыть его поставить, проект просто не скомпилируется (ошибка `NAV001`).
-- `[ParentLayout<TLayout>]` — в каком layout'е показывать эту ViewModel при навигации. Не нужен только для самого корневого layout'а (например, `WindowViewModel`).
+- `[ParentLayout<TLayout>]` — в каком layout'е показывать эту ViewModel при навигации. Если layout является корневым (например `WindowViewModel`), то используем `[Root]`
 - `INavigationTarget` / `INavigationTarget<TParameter>` — маркер «это экран, которым управляет навигация», второй вариант даёт `OnNavigatedTo(TParameter parameter)` для приёма параметра.
 - `ILayout<TDefaultContent>` — для классов-контейнеров (окно, вкладка, что угодно с `Content`), которые сами показывают вложенный `INavigationTarget`.
 
 Source generator анализирует эти атрибуты и интерфейсы в **проекте, который подключил библиотеку**, и генерирует:
 
-- `NavigationRegistry` — реализацию `INavigationRegistry` с готовыми словарями `View → ViewModel`, `ViewModel → ParentLayout`, `ViewModel → (ParameterType, OnNavigatedTo)`.
+- `NavigationRegistry` — реализацию `INavigationRegistry` с готовыми словарями `View → ViewModel`, `ViewModel → ParentLayout`, `ViewModel → (ParameterType, OnNavigatedTo)`, `Layout -> DefaultContent`.
 - `DataTemplatesOutput` — регистрацию `DataTemplate`/`FuncDataTemplate` для каждой пары ViewModel/View, под WPF или Avalonia (определяется автоматически по тому, какие сборки подключены к проекту).
 - Один метод `AddNavigation(...)`, который регистрирует всё сразу в DI.
+- Метод `InitializeNavigationRoot`, который находит `[Root]`, регистрирует его, и отдается его Instance для передачи в DataContext.
+
+> **Важно:** `AddNavigation(...)` — это не часть библиотеки, а код, который генератор пишет *в вашем проекте* на основе найденных классов, реализующих `INavigationTarget`. Пока в проекте нет ни одного такого класса (с `[View<TView>]`, `[ParentLayout<T>]`/`[Root]` и т.д.), метод `AddNavigation` просто не будет сгенерирован, и вызов не скомпилируется. Порядок действий такой: сначала опишите хотя бы одну ViewModel/Layout как в разделе [Базовые классы ViewModel](#базовые-классы-viewmodel), и только потом подключайте `AddNavigation(...)` в `App`.
 
 ## Установка
 
@@ -61,12 +66,17 @@ Source generator анализирует эти атрибуты и интерф�
 </configuration>
 ```
 
-Либо тем же способом через UI (Rider: `NuGet(Alt+Shift+7) → Sources`; Visual Studio: `Tools → NuGet Package Manager → Package Sources`) — добавить папку как ещё один источник, ничего не удаляя.
+Либо тем же способом через UI (Rider: `NuGet(Alt+Shift+7) → Sources`; Visual Studio: `Tools → NuGet Package Manager → Package Sources`) — добавить папку как ещё один источник в общий файл конфигурации, ничего не удаляя.
+
+> Расположение общего файла `NuGet.Config` по пути: `C:\Users\{User}\AppData\Roaming\NuGet\NuGet.Config`
 
 **3. Подключите пакет как обычно**
 
+Дополнительно, установив пакет `Microsoft.Extensions.DependencyInjection` v8.0.1 (см. [требования](#требования))
+
 ```xml
 <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
     <PackageReference Include="NavigationLibrary" Version="1.0.1" />
 </ItemGroup>
 ```
@@ -98,7 +108,7 @@ public partial class App : Application
         {
             desktop.MainWindow = new WindowView
             {
-                DataContext = provider.InitializeNavigationRoot<WindowViewModel>()
+                DataContext = provider.InitializeNavigationRoot()
             };
         }
 
@@ -121,7 +131,7 @@ public partial class App : Application
 
         var window = new WindowView
         {
-            DataContext = provider.InitializeNavigationRoot<WindowLayoutViewModel>()
+            DataContext = provider.InitializeNavigationRoot()
         };
         window.Show();
     }
@@ -207,6 +217,7 @@ public interface INavigationService
 ## Пример использования (с CommunityToolkit.Mvvm)
 
 ```csharp
+[Root]
 [View<WindowView>]
 public partial class WindowViewModel : Layout<MainViewModel>
 {
@@ -234,7 +245,7 @@ public class SecondViewModel(INavigationService navigationService) : NavigationT
 }
 ```
 
-`WindowViewModel` — корневой layout, поэтому у него нет `[ParentLayout<T>]`. `MainViewModel` и `SecondViewModel` указывают `[ParentLayout<WindowViewModel>]` — при навигации на них библиотека сама найдёт `WindowViewModel` в текущем дереве и подставит их в его `Content`.
+`WindowViewModel` — корневой layout, поэтому у него `[Root]`. `MainViewModel` и `SecondViewModel` указывают `[ParentLayout<WindowViewModel>]` — при навигации на них библиотека сама найдёт `WindowViewModel` в текущем дереве и подставит их в его `Content`.
 
 `navigationService.NavigateTo<SecondViewModel, string>("Some param")` вызовет `SecondViewModel.OnNavigatedTo("Some param")` сразу после создания экземпляра — без единого `Activator`/`MethodInfo.Invoke`, вызов компилируется напрямую в сгенерированном коде.
 
@@ -290,12 +301,29 @@ public class SecondViewModel(INavigationService navigationService) : NavigationT
 
 `ContentControl` сам разрешает, какой `DataTemplate` использовать для текущего значения `Content` — а эти шаблоны как раз и регистрирует `AddNavigation(...)` при старте приложения (по `[View<T>]` каждой ViewModel). Всё, что вы пишете в XAML layout'а — это статичная «рамка» вокруг одной точки подмены.
 
-## Диагностика на этапе компиляции
+## Troubleshooting
 
-Если класс реализует `INavigationTarget` (напрямую или через `ILayout`), но не помечен `[View<TView>]` — сборка падает с ошибкой `NAV001`, подсвеченной прямо на объявлении класса:
+Все ошибки ниже — это компиляционные диагностики от source generator'а (код вида `NAVxxx`), а не исключения в рантайме. Компилятор указывает точное место — обычно достаточно почитать текст ошибки и подсказку из этой таблицы.
 
+| Код | Когда возникает | Как исправить                                                                                                                                               |
+|---|---|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `NAV001` | Класс реализует `INavigationTarget` (напрямую или через `ILayout`), но не помечен `[View<TView>]` | Добавьте `[View<TView>]` над классом, указав View (класс наследуемый от UserControl \ Window), которая должна его отображать                                |
+| `NAV002` | Ни один класс в проекте не помечен `[Root]` | Пометьте `[Root]` самый верхний layout приложения (обычно `WindowViewModel`)                                                                                |
+| `NAV003` | `[Root]` стоит сразу на нескольких классах | В проекте может быть только один `[Root]` — оставьте его на единственном верхнеуровневом layout'е, у остальных используйте `[ParentLayout<T>]`              |
+| `NAV004` | Класс с `[Root]` не реализует `ILayout<TDefaultContent>` | `[Root]` можно ставить только на класс-layout (реализующий `ILayout<T>`), не на обычный `INavigationTarget`                                                 |
+| `NAV005` | Класс реализует `INavigationTarget`, но не помечен ни `[ParentLayout<T>]`, ни `[Root]` | Укажите `[ParentLayout<TLayout>]`, в каком layout'е должна отображаться эта ViewModel; если это и есть корень навигации — используйте `[Root]` вместо этого |
+| `NAV006` | На одном классе одновременно стоят `[Root]` и `[ParentLayout<T>]` | У корня по определению нет родителя — уберите один из двух атрибутов                                                                                        |
+| `NAV007` | Вызван `NavigateTo<TDestination>()` (без параметра), а `TDestination` реализует `INavigationTarget<TParameter>` | Замените вызов на `NavigateTo<TDestination, TParameter>(parameter)` — иначе `OnNavigatedTo` никогда не получит нужные данные                                |
+
+Если ошибка не из этого списка — вероятно, это обычная ошибка компилятора C#, а не диагностика библиотеки; проверьте номер (`NAVxxx` — от генератора, всё остальное — стандартный Roslyn/MSBuild).
+
+Если ошибка связана с отсутствием метода `.AddNavigation()` -> убедитесь, что существует хотя бы 1 класс (зачастую `WindowViewModel`), реализующий `[Root]`, `[View<>]`, `INavigationTarget` (или скрытно через `ILayout<>`).
+
+```mermaid
+flowchart TD
+    A[Christmas] -->|Get money| B(Go shopping)
+    B --> C{Let me think}
+    C -->|One| D[Laptop]
+    C -->|Two| E[iPhone]
+    C -->|Three| F[fa:fa-car Car]
 ```
-NAV001: Class 'MainViewModel' implements INavigationTarget but is missing a [View<TView>] attribute
-```
-
-Это сделано намеренно: связь ViewModel ↔ View считается обязательной, и её отсутствие — ошибка конфигурации, а не то, что должно тихо проявиться в рантайме.

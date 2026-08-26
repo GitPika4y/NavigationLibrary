@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
+using NavigationLibrary.Generator.Metadata;
 using NavigationLibrary.Generator.Providers;
 
 namespace NavigationLibrary.Generator.Generators;
@@ -18,6 +20,7 @@ public partial class NavigationOutputGenerator
         context.RegisterSourceOutput(metadataList, ReportViewModelDiagnostics);
         context.RegisterSourceOutput(metadataList, GenerateNavigationRegistry);
         context.RegisterSourceOutput(combined, (spc, pair) => GenerateDataTemplates(spc, pair.Left, pair.Right));
+        context.RegisterSourceOutput(metadataList, GenerateRootInitializer);
     }
 
     private static bool HasAvalonia(Compilation compilation) =>
@@ -25,4 +28,26 @@ public partial class NavigationOutputGenerator
 
     private static bool HasWpf(Compilation compilation) =>
         compilation.ReferencedAssemblyNames.Any(a => a.Name == "PresentationFramework");
+
+    private static void GenerateRootInitializer(SourceProductionContext spc, ImmutableArray<ViewModelMetadata> viewModels)
+    {
+        var rootType = viewModels.First(v => v.IsRoot).ClassType;
+
+        spc.AddSource("RootInitializer.g.cs",
+            $$"""
+            using Microsoft.Extensions.DependencyInjection;
+            using NavigationLibrary.Extensions;
+            using NavigationLibrary.Abstractions;
+            
+            namespace NavigationLibrary.Generated;
+            
+            public static class RootInitializer
+            {
+                public static ILayout InitializeNavigationRoot(this IServiceProvider provider)
+                {
+                    return provider.InitializeNavigationRootCore<{{rootType}}>();
+                }
+            }
+            """ );
+    }
 }
