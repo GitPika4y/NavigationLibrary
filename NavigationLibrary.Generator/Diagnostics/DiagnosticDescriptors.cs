@@ -67,4 +67,13 @@ public static class DiagnosticDescriptors
         isEnabledByDefault: true,
         description: "The class decorated with [Root] must implement ILayout<TDefaultContent>."
     );
+
+    public static readonly DiagnosticDescriptor NavigateToMissingParameter = new(
+        id: "NAV007",
+        title: "NavigateTo<T>() called on a target that requires a parameter",
+        messageFormat:"'{0}' implements INavigationTarget<{1}> and requires a parameter. Call NavigateTo<{0}, {1}>(parameter) instead",
+        category: "NavigationLibrary",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true
+    );
 }

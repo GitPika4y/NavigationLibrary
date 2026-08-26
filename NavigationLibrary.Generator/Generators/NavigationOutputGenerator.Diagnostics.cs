@@ -8,14 +8,14 @@ namespace NavigationLibrary.Generator.Generators;
 
 public partial class NavigationOutputGenerator
 {
-    private static void ReportDiagnostics(SourceProductionContext spc, ImmutableArray<ViewModelMetadata> metadata)
+    private static void ReportViewModelDiagnostics(SourceProductionContext spc, ImmutableArray<ViewModelMetadata> viewModels)
     {
-        if (metadata.IsDefaultOrEmpty)
+        if (viewModels.IsDefaultOrEmpty)
             return;
 
-        ReportIfMissingViewAttribute(spc, metadata);
-        ReportRootErrors(spc, metadata);
-        ReportParentLayoutErrors(spc, metadata);
+        ReportIfMissingViewAttribute(spc, viewModels);
+        ReportRootErrors(spc, viewModels);
+        ReportParentLayoutErrors(spc, viewModels);
     }
 
 
@@ -88,6 +88,22 @@ private static void ReportRootErrors(SourceProductionContext spc, ImmutableArray
                                          DiagnosticDescriptors.MissingParentLayoutAttribute,
                                          item.Location,
                                          item.ClassType));
+        }
+    }
+
+    private static void ReportNavigateToMissingParameter(SourceProductionContext spc,
+        ImmutableArray<NavigateToInvocationMetadata> invocations)
+    {
+        if (invocations.IsDefaultOrEmpty)
+            return;
+
+        foreach (var invocation in invocations)
+        {
+            spc.ReportDiagnostic(Diagnostic.Create(
+                DiagnosticDescriptors.NavigateToMissingParameter,
+                invocation.Location,
+                invocation.DestinationName,
+                invocation.ParameterType));
         }
     }
 }

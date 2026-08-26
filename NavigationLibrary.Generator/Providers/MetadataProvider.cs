@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NavigationLibrary.Generator.Extensions;
 using NavigationLibrary.Generator.Metadata;
 
-namespace NavigationLibrary.Generator;
+namespace NavigationLibrary.Generator.Providers;
 
 public static class MetadataProvider
 {
